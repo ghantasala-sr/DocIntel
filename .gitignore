@@ -1,0 +1,36 @@
+# --- Secrets & credentials (NEVER commit these) ---
+.env
+.env.*
+!.env.example
+*-key.json
+*service-account*.json
+application_default_credentials.json
+*.pem
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+
+# --- Node ---
+node_modules/
+dist/
+build/
+npm-debug.log*
+
+# --- Terraform (L5) ---
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+
+# --- OS / editor ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
