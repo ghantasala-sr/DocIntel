@@ -18,8 +18,22 @@ deployed and **why** we made each decision (great interview material later).
   gcloud CLI creds now use DocIntel; **ADC** (used by app code / client libraries)
   still needs its quota project set — deferred to the start of L1 where it matters.
 
-## Level 1 — API + AI (next)
+## Level 1 — API + AI (done)
 
-Planned: a Python/FastAPI service on **Cloud Run** exposing `/ask`, which calls
-**Vertex AI (Gemini)**. First we enable `run`, `aiplatform`, `artifactregistry`,
-`cloudbuild` APIs and fix the ADC quota project.
+- Python/FastAPI service on **Cloud Run**: `GET /` health check + `POST /ask` → Gemini.
+- Model: `gemini-2.5-flash` via **Vertex AI** (`vertexai=True`, authed by ADC locally,
+  by the service account in the cloud).
+- Packaged with a **Dockerfile**; deployed via `gcloud run deploy --source` →
+  Cloud Build builds the image → Artifact Registry stores it → Cloud Run runs it.
+- Live URL: https://docintel-api-825091457104.us-central1.run.app
+- Gotcha learned: `--source` deploy needs a **`.gcloudignore`** to make the upload
+  deterministic — without it, gcloud's git fallback dropped the Dockerfile and it
+  fell back to Buildpacks (build failed on missing entrypoint).
+- Security debt (fix in L4/L5): Cloud Run runs as the default compute SA with broad
+  `roles/editor`. Should become a dedicated SA with only `roles/aiplatform.user`
+  (least privilege). Endpoint is currently public (`--allow-unauthenticated`).
+
+## Level 2 — Storage (next)
+
+Planned: `POST /upload` stores a file in **Cloud Storage**; document metadata and
+Gemini results are persisted in **Firestore** so `/ask` can reference real documents.

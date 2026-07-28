@@ -33,8 +33,12 @@ Foundation: Cloud Build CI/CD · Terraform IaC · Cloud Monitoring
 - [x] **L0.4** Billing account linked
 - [x] **L0.5** Billing Budget API enabled
 - [x] **L0.6** $10/month budget with 50/90/100% alerts
-- [ ] **L0.7** Local repo scaffolded + first commit  ← you are here
-- [ ] **L1** begins: enable Cloud Run + Vertex AI APIs, fix ADC quota project
+- [x] **L0.7** Local repo scaffolded + first commit + pushed to GitHub
+- [x] **L1.1** Enabled Cloud Run + Vertex AI + Artifact Registry + Cloud Build APIs
+- [x] **L1.2** Fixed ADC quota project so local code can call Vertex AI
+- [x] **L1.3** FastAPI `/ask` endpoint calling Gemini (tested locally)
+- [x] **L1.4** Containerized (Dockerfile) + deployed to Cloud Run — **live**
+- [ ] **L2** begins: file uploads → Cloud Storage, results → Firestore  ← you are here
 
 ## Key identifiers
 
@@ -44,6 +48,7 @@ Foundation: Cloud Build CI/CD · Terraform IaC · Cloud Monitoring
 | Project number | `825091457104` |
 | Region / zone | `us-central1` / `us-central1-a` |
 | Billing account | `013472-F66E24-373390` |
+| Live API URL | https://docintel-api-825091457104.us-central1.run.app |
 
 ## Layout
 

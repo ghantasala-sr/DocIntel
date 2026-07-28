@@ -1,0 +1,10 @@
+# Controls what `gcloud run deploy --source` uploads.
+# Its mere presence stops gcloud from falling back to .git/.gitignore logic,
+# making the upload deterministic. Everything NOT listed here is uploaded —
+# so Dockerfile, main.py, and requirements.txt are all included.
+.venv/
+__pycache__/
+*.pyc
+.env
+try_gemini.py
+.git/
