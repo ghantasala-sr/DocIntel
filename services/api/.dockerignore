@@ -1,0 +1,6 @@
+# Never copy these into the image — keeps it small and avoids leaking local state.
+.venv/
+__pycache__/
+*.pyc
+.env
+try_gemini.py
