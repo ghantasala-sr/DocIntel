@@ -38,7 +38,12 @@ Foundation: Cloud Build CI/CD · Terraform IaC · Cloud Monitoring
 - [x] **L1.2** Fixed ADC quota project so local code can call Vertex AI
 - [x] **L1.3** FastAPI `/ask` endpoint calling Gemini (tested locally)
 - [x] **L1.4** Containerized (Dockerfile) + deployed to Cloud Run — **live**
-- [ ] **L2** begins: file uploads → Cloud Storage, results → Firestore  ← you are here
+- [x] **L2.1** Enabled Cloud Storage + Firestore APIs
+- [x] **L2.2** Created bucket `docintel-srg-2026-uploads` (uniform access, private)
+- [x] **L2.3** Created Firestore (Native mode, `us-central1`)
+- [x] **L2.4** `/upload` endpoint: GCS store + Gemini structured analysis + Firestore persist; `/documents` list & get
+- [x] **L2.5** Granted Vertex AI service agent read on bucket; redeployed — **live**
+- [ ] **L3** begins: async processing via Pub/Sub + Cloud Functions  ← you are here
 
 ## Key identifiers
 
