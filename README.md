@@ -43,7 +43,15 @@ Foundation: Cloud Build CI/CD · Terraform IaC · Cloud Monitoring
 - [x] **L2.3** Created Firestore (Native mode, `us-central1`)
 - [x] **L2.4** `/upload` endpoint: GCS store + Gemini structured analysis + Firestore persist; `/documents` list & get
 - [x] **L2.5** Granted Vertex AI service agent read on bucket; redeployed — **live**
-- [ ] **L3** begins: async processing via Pub/Sub + Cloud Functions  ← you are here
+- [x] **L3.1** Enabled Pub/Sub + Cloud Functions + Eventarc APIs
+- [x] **L3.2** Created Pub/Sub topic `document-uploads`
+- [x] **L3.3** Granted Cloud Storage service agent publish rights on the topic
+- [x] **L3.4** Wired bucket → topic notification (OBJECT_FINALIZE); observed a live message
+- [x] **L3.5** Wrote the processor Cloud Function (`services/processor`)
+- [x] **L3.6** Deployed the function (gen2, Pub/Sub-triggered) — **ACTIVE**
+- [x] **L3.7** Made `/upload` async (store + `status: processing`, returns instantly)
+- [x] **L3.8** Verified async flow end-to-end (upload → queue → function → Firestore `done`)
+- [ ] **L4** begins: web UI + Cloud Scheduler + monitoring  ← you are here
 
 ## Key identifiers
 
