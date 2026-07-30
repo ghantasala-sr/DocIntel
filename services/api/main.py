@@ -40,9 +40,13 @@ def index():
     return (STATIC_DIR / "index.html").read_text(encoding="utf-8")
 
 
-@app.get("/healthz")
+@app.get("/health")
 def health():
-    """Health check — used by uptime checks / monitoring."""
+    """Health check — used by uptime checks / monitoring.
+
+    Note: intentionally NOT /healthz — Google's Front End reserves that path and
+    intercepts it before it reaches the container (requests 404 without hitting the app).
+    """
     return {"status": "ok", "service": "docintel-api", "model": MODEL, "bucket": BUCKET}
 
 

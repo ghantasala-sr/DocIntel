@@ -54,7 +54,7 @@ Foundation: Cloud Build CI/CD · Terraform IaC · Cloud Monitoring
 - [x] **L4.1** Web UI served by the API (upload + live status + results browser)
 - [x] **L4.2** Least-privilege service accounts for API & function (retired `roles/editor`)
 - [x] **L4.3** Cloud Scheduler daily stats job (OIDC-authenticated) + `/tasks/stats`, `/stats`
-- [x] **L4.4** Cloud Monitoring: uptime check on `/healthz` + email alert policy
+- [x] **L4.4** Cloud Monitoring: uptime check on `/health` + email alert policy
 - [ ] **L5** begins: Go rewrite + Cloud Build CI/CD + Terraform  ← you are here
 
 ## Key identifiers

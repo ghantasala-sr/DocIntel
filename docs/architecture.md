@@ -74,7 +74,7 @@ Key rule: parse exact numbers from XBRL deterministically; use the LLM for narra
 ## Level 4 — Web UI + ops (done)
 
 - **Web UI**: `services/api/static/index.html` served by the API at `/` (health moved to
-  `/healthz`). Same-origin (no CORS); upload + auto-refreshing results table showing the
+  `/health`). Same-origin (no CORS); upload + auto-refreshing results table showing the
   `processing → done` flip live. Alternative not taken: static hosting on GCS/Firebase
   (would need CORS on the API).
 - **Least-privilege SAs** (retired shared `roles/editor`):
@@ -86,8 +86,11 @@ Key rule: parse exact numbers from XBRL deterministically; use the LLM for narra
   `POST /tasks/stats` via **OIDC** as `docintel-scheduler-sa` (granted `run.invoker` on the
   API). Gotcha: the Cloud Scheduler **service agent** needed
   `roles/iam.serviceAccountTokenCreator` on the scheduler SA to mint the OIDC token.
-- **Cloud Monitoring**: uptime check on `/healthz` (5-min, multi-region) + email
+- **Cloud Monitoring**: uptime check on `/health` (5-min, multi-region) + email
   notification channel + alert policy "DocIntel API down".
+  - **Gotcha**: originally used `/healthz`, which Google's Front End reserves and
+    intercepts before the container — the route existed in the app but was unreachable
+    externally (404), so the check failed and the alert fired. Renamed to `/health`.
 - **Identity count so far** (a running theme): user/ADC, API SA, processor SA, scheduler SA,
   Cloud Storage service agent, Vertex AI service agent, Cloud Scheduler service agent.
 
