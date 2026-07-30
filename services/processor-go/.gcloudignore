@@ -1,0 +1,6 @@
+# Deterministic upload for `gcloud functions deploy --source`.
+# Everything else (go.mod, go.sum, *.go) is uploaded and needed for the build.
+.git/
+# The local runner — Cloud Functions provides its own main, and an extra
+# `package main` would confuse the build. Only needed for local testing.
+cmd/

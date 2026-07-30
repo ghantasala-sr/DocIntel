@@ -55,7 +55,9 @@ Foundation: Cloud Build CI/CD · Terraform IaC · Cloud Monitoring
 - [x] **L4.2** Least-privilege service accounts for API & function (retired `roles/editor`)
 - [x] **L4.3** Cloud Scheduler daily stats job (OIDC-authenticated) + `/tasks/stats`, `/stats`
 - [x] **L4.4** Cloud Monitoring: uptime check on `/health` + email alert policy
-- [ ] **L5** begins: Go rewrite + Cloud Build CI/CD + Terraform  ← you are here
+- [x] **L5.1** Rewrote the processor in **Go** (`services/processor-go`), deployed to Cloud Functions (`go126`) — replaced the Python one on the same trigger/SA
+- [ ] **L5.2** Cloud Build CI/CD (git push → auto build + deploy)  ← you are here
+- [ ] **L5.3** Terraform to codify all infrastructure
 
 ## Key identifiers
 
