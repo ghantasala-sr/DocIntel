@@ -5,14 +5,17 @@ extracts a summary, key entities, and answers questions → results are stored a
 queryable via an API and a small web UI. Built **level by level** to demonstrate real
 cloud architecture, not a single script.
 
-## Target architecture
+## Architecture
 
-```
-Web UI → Cloud Run API (Python/FastAPI) → Cloud Storage (upload)
-             ↓ event
-          Pub/Sub → Cloud Function → Vertex AI (Gemini) → Firestore (results)
-Foundation: Cloud Build CI/CD · Terraform IaC · Cloud Monitoring
-```
+High-level overview:
+
+![High-level architecture](docs/architecture-high-level.svg)
+
+Detailed view — every service annotated with its service account, IAM roles, and trigger mechanism:
+
+![Low-level architecture with IAM roles](docs/architecture-low-level.svg)
+
+Design decisions and per-level notes live in [docs/architecture.md](docs/architecture.md).
 
 ## Roadmap
 

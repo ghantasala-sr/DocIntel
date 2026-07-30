@@ -1,0 +1,100 @@
+<svg width="680" height="636" viewBox="0 0 680 636" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <rect x="0" y="0" width="680" height="636" fill="#ffffff"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b4b2a9"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="26" font-size="12" font-weight="500" fill="#57564f">request path · public HTTPS</text>
+  <rect x="40" y="36" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="49" y="53" font-size="13" font-weight="500" fill="#1f2328">User</text>
+  <text x="49" y="67" font-size="10.5" fill="#8a897f">browser</text>
+  <rect x="196" y="36" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="205" y="53" font-size="13" font-weight="500" fill="#1f2328">Web UI</text>
+  <text x="205" y="67" font-size="10.5" fill="#8a897f">static page at /</text>
+  <rect x="352" y="36" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="361" y="53" font-size="13" font-weight="500" fill="#1f2328">API</text>
+  <text x="361" y="67" font-size="10.5" fill="#8a897f">Cloud Run · FastAPI</text>
+  <text x="361" y="83" font-size="10" font-family="ui-monospace, Menlo, monospace" fill="#57564f">docintel-api-sa</text>
+  <text x="361" y="98" font-size="9.5" fill="#185FA5">storage.objectCreator</text>
+  <text x="361" y="109" font-size="9.5" fill="#185FA5">datastore.user</text>
+  <text x="361" y="120" font-size="9.5" fill="#185FA5">aiplatform.user</text>
+  <rect x="508" y="36" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="517" y="53" font-size="13" font-weight="500" fill="#1f2328">Cloud Storage</text>
+  <text x="517" y="67" font-size="10.5" fill="#8a897f">uploads · private</text>
+  <line x1="174" y1="86" x2="194" y2="86" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="330" y1="86" x2="350" y2="86" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="486" y1="86" x2="506" y2="86" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <text x="40" y="152" font-size="10.5" fill="#8a897f">API also writes a status:processing Firestore record, then returns instantly</text>
+
+  <text x="40" y="180" font-size="12" font-weight="500" fill="#57564f">async AI pipeline · event-driven</text>
+  <rect x="40" y="190" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="49" y="207" font-size="13" font-weight="500" fill="#1f2328">Pub/Sub</text>
+  <text x="49" y="221" font-size="10.5" fill="#8a897f">topic + DLQ (Terraform)</text>
+  <text x="49" y="237" font-size="10" font-family="ui-monospace, Menlo, monospace" fill="#57564f">GCS agent →</text>
+  <text x="49" y="252" font-size="9.5" fill="#185FA5">pubsub.publisher</text>
+  <rect x="196" y="190" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="205" y="207" font-size="13" font-weight="500" fill="#1f2328">Function · Go</text>
+  <text x="205" y="221" font-size="10.5" fill="#8a897f">gen2 · Eventarc</text>
+  <text x="205" y="237" font-size="10" font-family="ui-monospace, Menlo, monospace" fill="#57564f">docintel-processor-sa</text>
+  <text x="205" y="252" font-size="9.5" fill="#185FA5">eventarc.eventReceiver</text>
+  <text x="205" y="263" font-size="9.5" fill="#185FA5">run.invoker</text>
+  <text x="205" y="274" font-size="9.5" fill="#185FA5">datastore.user</text>
+  <text x="205" y="285" font-size="9.5" fill="#185FA5">aiplatform.user</text>
+  <rect x="352" y="190" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="361" y="207" font-size="13" font-weight="500" fill="#1f2328">Vertex AI</text>
+  <text x="361" y="221" font-size="10.5" fill="#8a897f">Gemini 2.5 Flash</text>
+  <text x="361" y="237" font-size="10" font-family="ui-monospace, Menlo, monospace" fill="#57564f">Vertex agent →</text>
+  <text x="361" y="252" font-size="9.5" fill="#185FA5">storage.objectViewer</text>
+  <rect x="508" y="190" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="517" y="207" font-size="13" font-weight="500" fill="#1f2328">Firestore</text>
+  <text x="517" y="221" font-size="10.5" fill="#8a897f">documents</text>
+  <line x1="174" y1="240" x2="194" y2="240" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="330" y1="240" x2="350" y2="240" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="486" y1="240" x2="506" y2="240" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <text x="40" y="306" font-size="10.5" fill="#8a897f">OBJECT_FINALIZE → Pub/Sub → function reads via gs://, merges status:done into Firestore</text>
+
+  <text x="40" y="334" font-size="12" font-weight="500" fill="#57564f">operations</text>
+  <rect x="40" y="344" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="49" y="361" font-size="13" font-weight="500" fill="#1f2328">Scheduler</text>
+  <text x="49" y="375" font-size="10.5" fill="#8a897f">daily → /tasks/stats</text>
+  <text x="49" y="391" font-size="10" font-family="ui-monospace, Menlo, monospace" fill="#57564f">docintel-scheduler-sa</text>
+  <text x="49" y="406" font-size="9.5" fill="#185FA5">run.invoker (OIDC)</text>
+  <rect x="196" y="344" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="205" y="361" font-size="13" font-weight="500" fill="#1f2328">API</text>
+  <text x="205" y="375" font-size="10.5" fill="#8a897f">recompute stats</text>
+  <rect x="352" y="344" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="361" y="361" font-size="13" font-weight="500" fill="#1f2328">Monitoring</text>
+  <text x="361" y="375" font-size="10.5" fill="#8a897f">uptime /health</text>
+  <rect x="508" y="344" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="517" y="361" font-size="13" font-weight="500" fill="#1f2328">Email alert</text>
+  <text x="517" y="375" font-size="10.5" fill="#8a897f">notification channel</text>
+  <line x1="174" y1="394" x2="194" y2="394" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="330" y1="394" x2="350" y2="394" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="486" y1="394" x2="506" y2="394" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <text x="40" y="460" font-size="10.5" fill="#8a897f">Scheduler service agent holds iam.serviceAccountTokenCreator on the scheduler SA (mints OIDC token)</text>
+
+  <text x="40" y="488" font-size="12" font-weight="500" fill="#57564f">foundation · CI/CD and IaC</text>
+  <rect x="40" y="498" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="49" y="515" font-size="13" font-weight="500" fill="#1f2328">GitHub</text>
+  <text x="49" y="529" font-size="10.5" fill="#8a897f">push to main</text>
+  <rect x="196" y="498" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="205" y="515" font-size="13" font-weight="500" fill="#1f2328">Cloud Build</text>
+  <text x="205" y="529" font-size="10.5" fill="#8a897f">cloudbuild.yaml</text>
+  <text x="205" y="545" font-size="10" font-family="ui-monospace, Menlo, monospace" fill="#57564f">docintel-cicd-sa</text>
+  <text x="205" y="560" font-size="9.5" fill="#185FA5">run.developer</text>
+  <text x="205" y="571" font-size="9.5" fill="#185FA5">artifactregistry.writer</text>
+  <text x="205" y="582" font-size="9.5" fill="#185FA5">logging.logWriter</text>
+  <text x="205" y="593" font-size="9.5" fill="#185FA5">iam.serviceAccountUser</text>
+  <rect x="352" y="498" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="361" y="515" font-size="13" font-weight="500" fill="#1f2328">Artifact Registry</text>
+  <text x="361" y="529" font-size="10.5" fill="#8a897f">image :sha</text>
+  <rect x="508" y="498" width="132" height="100" rx="9" fill="#ffffff" stroke="#d8d7cf"/>
+  <text x="517" y="515" font-size="13" font-weight="500" fill="#1f2328">Deploy</text>
+  <text x="517" y="529" font-size="10.5" fill="#8a897f">→ Cloud Run</text>
+  <line x1="174" y1="548" x2="194" y2="548" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="330" y1="548" x2="350" y2="548" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="486" y1="548" x2="506" y2="548" stroke="#b4b2a9" stroke-width="2" marker-end="url(#a)"/>
+  <text x="40" y="614" font-size="10.5" fill="#8a897f">Terraform (infra/) manages the Pub/Sub topic + dead-letter topic via state</text>
+</svg>
