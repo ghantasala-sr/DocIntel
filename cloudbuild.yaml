@@ -1,0 +1,43 @@
+# CI/CD pipeline for the DocIntel API.
+# Runs automatically when Cloud Build's trigger fires on a push to main:
+# build the container image -> push it to Artifact Registry -> deploy to Cloud Run.
+#
+# $PROJECT_ID and $SHORT_SHA are substitutions Cloud Build fills in automatically
+# ($SHORT_SHA = the short git commit hash, so each image is tagged by commit).
+
+steps:
+  # 1) Build the API image from services/api/Dockerfile.
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/docintel-api:$SHORT_SHA
+      - services/api
+
+  # 2) Push the image to Artifact Registry.
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/docintel-api:$SHORT_SHA
+
+  # 3) Deploy that exact image to Cloud Run (same flags as our manual deploy).
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - docintel-api
+      - --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/docintel-api:$SHORT_SHA
+      - --region=us-central1
+      - --service-account=docintel-api-sa@docintel-srg-2026.iam.gserviceaccount.com
+      - --set-env-vars=PROJECT_ID=docintel-srg-2026,REGION=us-central1,BUCKET=docintel-srg-2026-uploads
+
+# Record the built image in the build's metadata.
+images:
+  - us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/docintel-api:$SHORT_SHA
+
+options:
+  logging: CLOUD_LOGGING_ONLY
