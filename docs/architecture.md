@@ -94,7 +94,7 @@ Key rule: parse exact numbers from XBRL deterministically; use the LLM for narra
 - **Identity count so far** (a running theme): user/ADC, API SA, processor SA, scheduler SA,
   Cloud Storage service agent, Vertex AI service agent, Cloud Scheduler service agent.
 
-## Level 5 — Production polish (in progress)
+## Level 5 — Production polish (done)
 
 - **Go rewrite (done)**: the processor is reimplemented in Go (`services/processor-go`)
   and deployed to the *same* Cloud Function (`docintel-processor`, runtime `go126`,
@@ -104,6 +104,26 @@ Key rule: parse exact numbers from XBRL deterministically; use the LLM for narra
   - Why Go: ~10x smaller container, faster cold starts, compile-time type safety.
   - Local testing: `cmd/main.go` runs it via the Functions Framework; excluded from the
     deploy upload via `.gcloudignore` (an extra `package main` would break the build).
-- **Cloud Build CI/CD (next)**: `cloudbuild.yaml` + a GitHub trigger → push auto-deploys.
-- **Terraform (next)**: codify project config, bucket, topic + notification, all SAs +
-  IAM bindings, scheduler, and monitoring as version-controlled Infrastructure as Code.
+- **Cloud Build CI/CD (done)**: `cloudbuild.yaml` (docker build → push to Artifact
+  Registry → `gcloud run deploy` the API, image tagged by `$SHORT_SHA`) + a GitHub
+  trigger `docintel-api-deploy` on push to `main`. Runs as a dedicated least-privilege
+  `docintel-cicd-sa` (run.developer, artifactregistry.writer, logging.logWriter, +
+  serviceAccountUser on `docintel-api-sa`). Org policy *required* a user-managed build
+  SA — good default. This is Continuous **Deployment** (no approval gate). Next step to
+  strengthen it: add a `go test` / `pytest` stage before deploy.
+- **Terraform (done, `infra/`)**: `main.tf` + `variables.tf`. Created a **dead-letter
+  topic** `document-uploads-dlq` from code, and **imported** the existing
+  `document-uploads` topic so Terraform manages it too (`plan` → no changes = code
+  matches reality). Demonstrated the full loop: write → init → plan → apply → import.
+  Local state (`terraform.tfstate`, gitignored); production would use a remote GCS
+  backend. Caution: this state now owns the live topic, so `terraform destroy` would
+  delete it.
+  - Not yet codified (future work): bucket, notification, SAs + all IAM, scheduler,
+    monitoring — the same patterns extended to the rest of the stack.
+
+## Identities in the system (a running theme)
+
+user/ADC · `docintel-api-sa` · `docintel-processor-sa` · `docintel-scheduler-sa` ·
+`docintel-cicd-sa` · Cloud Storage service agent · Vertex AI service agent ·
+Cloud Scheduler service agent · Pub/Sub service agent. Each has only the permissions
+it needs — the least-privilege story end to end.
