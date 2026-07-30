@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DocIntel</title>
+<style>
+  :root { --bg:#0f1216; --card:#171b21; --muted:#8b96a5; --text:#e6eaf0; --accent:#4f9cf9; --ok:#3fb950; --warn:#d29922; --line:#252b33; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:20px 24px; border-bottom:1px solid var(--line); }
+  header h1 { margin:0; font-size:20px; }
+  header p { margin:4px 0 0; color:var(--muted); font-size:13px; }
+  main { max-width:960px; margin:0 auto; padding:24px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:20px; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  input[type=file] { color:var(--muted); font-size:14px; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:7px; padding:9px 16px; font-size:14px; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  button.secondary { background:transparent; border:1px solid var(--line); color:var(--text); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; }
+  .badge { font-size:11px; padding:2px 8px; border-radius:20px; }
+  .badge.done { background:rgba(63,185,80,.15); color:var(--ok); }
+  .badge.processing { background:rgba(210,153,34,.15); color:var(--warn); }
+  .entities span { display:inline-block; background:#20262e; color:var(--muted); border-radius:5px; padding:1px 6px; margin:2px 3px 0 0; font-size:11px; }
+  .muted { color:var(--muted); }
+  code { color:var(--accent); font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>DocIntel</h1>
+  <p>Upload a document — it's stored, analyzed by Gemini asynchronously, and results appear below.</p>
+</header>
+<main>
+  <div class="card">
+    <div class="row">
+      <input type="file" id="file" />
+      <button id="uploadBtn" onclick="upload()">Upload &amp; analyze</button>
+      <span id="status" class="muted"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between; margin-bottom:12px;">
+      <strong>Documents</strong>
+      <button class="secondary" onclick="refresh()">Refresh</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th>File</th><th>Status</th><th>Type</th><th>Summary</th><th>Entities</th></tr>
+      </thead>
+      <tbody id="docs"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+async function upload() {
+  const input = document.getElementById('file');
+  const btn = document.getElementById('uploadBtn');
+  const status = document.getElementById('status');
+  if (!input.files.length) { status.textContent = 'Pick a file first.'; return; }
+  btn.disabled = true; status.textContent = 'Uploading…';
+  const body = new FormData();
+  body.append('file', input.files[0]);
+  try {
+    const res = await fetch('/upload', { method: 'POST', body });
+    const doc = await res.json();
+    status.textContent = 'Uploaded — analyzing (id ' + doc.id.slice(0, 8) + '…)';
+    input.value = '';
+    refresh();
+  } catch (e) {
+    status.textContent = 'Upload failed: ' + e;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function esc(s) { return (s ?? '').toString().replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+async function refresh() {
+  const tbody = document.getElementById('docs');
+  try {
+    const docs = await (await fetch('/documents')).json();
+    if (!docs.length) { tbody.innerHTML = '<tr><td colspan="5" class="muted">No documents yet.</td></tr>'; return; }
+    tbody.innerHTML = docs.map(d => `
+      <tr>
+        <td>${esc(d.filename)}<br><code>${esc((d.id||'').slice(0,8))}</code></td>
+        <td><span class="badge ${d.status==='done'?'done':'processing'}">${esc(d.status||'')}</span></td>
+        <td>${esc(d.doc_type||'—')}</td>
+        <td>${esc(d.summary||'—')}</td>
+        <td class="entities">${(d.entities||[]).map(e => `<span>${esc(e)}</span>`).join('')}</td>
+      </tr>`).join('');
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load: ' + esc(e) + '</td></tr>';
+  }
+}
+
+refresh();
+setInterval(refresh, 4000);
+</script>
+</body>
+</html>
