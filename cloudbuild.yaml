@@ -32,7 +32,6 @@ steps:
       - docintel-api
       - --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/docintel-api:$SHORT_SHA
       - --region=us-central1
-      - --allow-unauthenticated
       - --service-account=docintel-api-sa@docintel-srg-2026.iam.gserviceaccount.com
       - --set-env-vars=PROJECT_ID=docintel-srg-2026,REGION=us-central1,BUCKET=docintel-srg-2026-uploads
 
