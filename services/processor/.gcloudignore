@@ -1,0 +1,7 @@
+# Deterministic upload for `gcloud functions deploy --source`.
+# Everything not listed is uploaded — so main.py and requirements.txt are included.
+.venv/
+__pycache__/
+*.pyc
+.env
+.git/

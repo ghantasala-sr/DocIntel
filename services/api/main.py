@@ -1,4 +1,9 @@
-"""DocIntel API — FastAPI service: Gemini Q&A + document upload/analysis on GCP."""
+"""DocIntel API — FastAPI service: Gemini Q&A + async document upload on GCP.
+
+/upload is now asynchronous: it stores the file and records it as "processing",
+then returns immediately. A Cloud Function (services/processor) does the Gemini
+analysis out-of-band and flips the record to "done".
+"""
 import os
 import uuid
 from datetime import datetime, timezone
@@ -6,7 +11,6 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel
 from google import genai
-from google.genai import types
 from google.cloud import storage, firestore
 
 PROJECT = os.environ.get("PROJECT_ID", "docintel-srg-2026")
@@ -14,31 +18,16 @@ LOCATION = os.environ.get("REGION", "us-central1")
 MODEL = os.environ.get("MODEL", "gemini-2.5-flash")
 BUCKET = os.environ.get("BUCKET", "docintel-srg-2026-uploads")
 
-# Clients created once at startup and reused across requests.
 client = genai.Client(vertexai=True, project=PROJECT, location=LOCATION)
 storage_client = storage.Client(project=PROJECT)
 bucket = storage_client.bucket(BUCKET)
 db = firestore.Client(project=PROJECT)
 
-app = FastAPI(title="DocIntel API", version="0.2.0")
-
-ANALYSIS_PROMPT = (
-    "You are a document analyst. Analyze the attached document and produce: "
-    "a concise 2-3 sentence summary; up to 6 key entities (people, "
-    "organizations, dates, monetary amounts, locations); and a short "
-    "document-type label (e.g. invoice, resume, contract, article, email)."
-)
+app = FastAPI(title="DocIntel API", version="0.3.0")
 
 
 class AskRequest(BaseModel):
     question: str
-
-
-class DocAnalysis(BaseModel):
-    """The structured shape we force Gemini to return (schema-constrained output)."""
-    summary: str
-    entities: list[str]
-    doc_type: str
 
 
 @app.get("/")
@@ -56,37 +45,24 @@ def ask(req: AskRequest):
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
-    """Store a file in Cloud Storage, analyze it with Gemini, persist results in Firestore."""
+    """Store the file + a 'processing' record, then return instantly.
+
+    Uploading the object fires a GCS event -> Pub/Sub -> the processor function,
+    which analyzes it and merges the results into this same record.
+    """
     data = await file.read()
     content_type = file.content_type or "text/plain"
     doc_id = uuid.uuid4().hex
-
-    # 1) Store the raw file as an object in the bucket.
     object_name = f"uploads/{doc_id}/{file.filename}"
     bucket.blob(object_name).upload_from_string(data, content_type=content_type)
-    gcs_uri = f"gs://{BUCKET}/{object_name}"
 
-    # 2) Ask Gemini to analyze the file (read straight from GCS) into a fixed schema.
-    response = client.models.generate_content(
-        model=MODEL,
-        contents=[types.Part.from_uri(file_uri=gcs_uri, mime_type=content_type), ANALYSIS_PROMPT],
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=DocAnalysis,
-        ),
-    )
-    analysis: DocAnalysis = response.parsed
-
-    # 3) Persist a record about the file (not the file itself) in Firestore.
     record = {
         "filename": file.filename,
         "content_type": content_type,
         "size_bytes": len(data),
-        "gcs_uri": gcs_uri,
+        "gcs_uri": f"gs://{BUCKET}/{object_name}",
         "uploaded_at": datetime.now(timezone.utc),
-        "summary": analysis.summary,
-        "entities": analysis.entities,
-        "doc_type": analysis.doc_type,
+        "status": "processing",
     }
     db.collection("documents").document(doc_id).set(record)
     return {"id": doc_id, **record}
@@ -94,7 +70,7 @@ async def upload(file: UploadFile = File(...)):
 
 @app.get("/documents")
 def list_documents():
-    """List all analyzed documents, newest first."""
+    """List all documents, newest first."""
     docs = (
         db.collection("documents")
         .order_by("uploaded_at", direction=firestore.Query.DESCENDING)

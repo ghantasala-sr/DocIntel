@@ -54,8 +54,25 @@ ingest (Pub/Sub on GCS finalize — L3), parsing (Document AI / XBRL), chunking 
 (Vertex Vector Search), bulk LLM (Vertex Batch Prediction), and BigQuery analytics.
 Key rule: parse exact numbers from XBRL deterministically; use the LLM for narrative.
 
-## Level 3 — Async processing (next)
+## Level 3 — Async processing (done)
 
-Planned: uploading a file publishes an event to **Pub/Sub**; a **Cloud Function**
-consumes it and runs the analysis out-of-band, so the HTTP request returns instantly
-and large/slow documents don't block the caller.
+- **`/upload` is now async**: it stores the object + a Firestore record with
+  `status: "processing"` and returns immediately (no AI in the request path).
+- **Event flow**: object lands in the bucket → GCS **notification** publishes an
+  OBJECT_FINALIZE message to the **Pub/Sub** topic `document-uploads` → the
+  **Cloud Function** `docintel-processor` (gen2, `services/processor`) consumes it,
+  runs Gemini, and `merge`s `summary`/`entities`/`doc_type`/`status: "done"` into the
+  same record.
+- **Identities wired**: Cloud Storage service agent granted `roles/pubsub.publisher`
+  on the topic; the function runs as the compute SA (Editor); Vertex service-agent
+  bucket-read grant from L2 still applies.
+- **Decoupling proven**: measured upload→done at ~9s, fully out-of-band — the caller
+  never waits on the model. This is what unblocks large/slow documents.
+- **Debt (L4/L5)**: trigger has `RETRY_POLICY_DO_NOT_RETRY` — production wants retries
+  + a dead-letter topic; still on the broad compute SA (want least privilege).
+
+## Level 4 — Web UI + ops (next)
+
+Planned: a simple web front-end (upload + browse results), **Cloud Scheduler** for
+periodic ingest (the EDGAR "pull on a schedule" step), and **Cloud Monitoring**
+dashboards/alerts. Likely tighten IAM to a dedicated least-privilege service account.
