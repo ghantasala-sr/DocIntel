@@ -1,0 +1,49 @@
+<svg width="680" height="470" viewBox="0 0 680 470" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <rect x="0" y="0" width="680" height="470" fill="#ffffff"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8a897f"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="30" font-size="12" fill="#8a897f">request path</text>
+  <rect x="40" y="42" width="150" height="54" rx="8" fill="#E6F1FB" stroke="#85B7EB"/>
+  <text x="115" y="66" text-anchor="middle" font-size="14" font-weight="500" fill="#0C447C">User · Web UI</text>
+  <text x="115" y="84" text-anchor="middle" font-size="11.5" fill="#185FA5">browser</text>
+  <rect x="265" y="42" width="150" height="54" rx="8" fill="#E6F1FB" stroke="#85B7EB"/>
+  <text x="340" y="66" text-anchor="middle" font-size="14" font-weight="500" fill="#0C447C">API</text>
+  <text x="340" y="84" text-anchor="middle" font-size="11.5" fill="#185FA5">Cloud Run · FastAPI</text>
+  <rect x="490" y="42" width="150" height="54" rx="8" fill="#E1F5EE" stroke="#5DCAA5"/>
+  <text x="565" y="66" text-anchor="middle" font-size="14" font-weight="500" fill="#085041">Cloud Storage</text>
+  <text x="565" y="84" text-anchor="middle" font-size="11.5" fill="#0F6E56">file uploads</text>
+
+  <line x1="190" y1="69" x2="263" y2="69" stroke="#8a897f" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="415" y1="69" x2="488" y2="69" stroke="#8a897f" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="565" y1="96" x2="565" y2="152" stroke="#8a897f" stroke-width="2" marker-end="url(#a)"/>
+
+  <text x="40" y="140" font-size="12" fill="#8a897f">async AI pipeline</text>
+  <rect x="490" y="154" width="150" height="54" rx="8" fill="#E1F5EE" stroke="#5DCAA5"/>
+  <text x="565" y="178" text-anchor="middle" font-size="14" font-weight="500" fill="#085041">Pub/Sub</text>
+  <text x="565" y="196" text-anchor="middle" font-size="11.5" fill="#0F6E56">event queue</text>
+  <rect x="265" y="154" width="150" height="54" rx="8" fill="#E1F5EE" stroke="#5DCAA5"/>
+  <text x="340" y="178" text-anchor="middle" font-size="14" font-weight="500" fill="#085041">Cloud Function</text>
+  <text x="340" y="196" text-anchor="middle" font-size="11.5" fill="#0F6E56">Go · gen2</text>
+  <rect x="40" y="154" width="150" height="54" rx="8" fill="#EEEDFE" stroke="#AFA9EC"/>
+  <text x="115" y="178" text-anchor="middle" font-size="14" font-weight="500" fill="#3C3489">Vertex AI</text>
+  <text x="115" y="196" text-anchor="middle" font-size="11.5" fill="#534AB7">Gemini 2.5</text>
+
+  <line x1="490" y1="181" x2="417" y2="181" stroke="#8a897f" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="265" y1="181" x2="192" y2="181" stroke="#8a897f" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="115" y1="208" x2="115" y2="264" stroke="#8a897f" stroke-width="2" marker-end="url(#a)"/>
+
+  <text x="40" y="252" font-size="12" fill="#8a897f">data</text>
+  <rect x="40" y="266" width="150" height="54" rx="8" fill="#E1F5EE" stroke="#5DCAA5"/>
+  <text x="115" y="290" text-anchor="middle" font-size="14" font-weight="500" fill="#085041">Firestore</text>
+  <text x="115" y="308" text-anchor="middle" font-size="11.5" fill="#0F6E56">results store</text>
+  <path d="M190,293 C320,293 340,150 340,98" fill="none" stroke="#8a897f" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#a)"/>
+  <text x="205" y="285" font-size="11.5" fill="#8a897f">API reads results back to UI</text>
+
+  <rect x="40" y="356" width="600" height="60" rx="10" fill="#F1EFE8" stroke="#B4B2A9"/>
+  <text x="340" y="380" text-anchor="middle" font-size="14" font-weight="500" fill="#444441">Foundation</text>
+  <text x="340" y="400" text-anchor="middle" font-size="11.5" fill="#5F5E5A">Cloud Build CI/CD · Terraform IaC · Scheduler · Monitoring</text>
+</svg>
