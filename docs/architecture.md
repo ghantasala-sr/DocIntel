@@ -94,8 +94,16 @@ Key rule: parse exact numbers from XBRL deterministically; use the LLM for narra
 - **Identity count so far** (a running theme): user/ADC, API SA, processor SA, scheduler SA,
   Cloud Storage service agent, Vertex AI service agent, Cloud Scheduler service agent.
 
-## Level 5 — Production polish (next)
+## Level 5 — Production polish (in progress)
 
-Planned: rewrite the hot-path (processor or a new service) in **Go** on Cloud Run;
-**Cloud Build** CI/CD (build/test/deploy on push); **Terraform** to codify all the infra
-we created by hand (project, bucket, topic, SAs + IAM, scheduler, monitoring).
+- **Go rewrite (done)**: the processor is reimplemented in Go (`services/processor-go`)
+  and deployed to the *same* Cloud Function (`docintel-processor`, runtime `go126`,
+  same Pub/Sub trigger + `docintel-processor-sa`), replacing the Python one. The Python
+  version stays in `services/processor/` as the "before". Writes the same snake_case
+  Firestore fields so the API/UI are unaffected — a clean, drop-in language swap.
+  - Why Go: ~10x smaller container, faster cold starts, compile-time type safety.
+  - Local testing: `cmd/main.go` runs it via the Functions Framework; excluded from the
+    deploy upload via `.gcloudignore` (an extra `package main` would break the build).
+- **Cloud Build CI/CD (next)**: `cloudbuild.yaml` + a GitHub trigger → push auto-deploys.
+- **Terraform (next)**: codify project config, bucket, topic + notification, all SAs +
+  IAM bindings, scheduler, and monitoring as version-controlled Infrastructure as Code.
