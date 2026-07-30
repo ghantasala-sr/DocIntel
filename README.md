@@ -56,8 +56,10 @@ Foundation: Cloud Build CI/CD · Terraform IaC · Cloud Monitoring
 - [x] **L4.3** Cloud Scheduler daily stats job (OIDC-authenticated) + `/tasks/stats`, `/stats`
 - [x] **L4.4** Cloud Monitoring: uptime check on `/health` + email alert policy
 - [x] **L5.1** Rewrote the processor in **Go** (`services/processor-go`), deployed to Cloud Functions (`go126`) — replaced the Python one on the same trigger/SA
-- [ ] **L5.2** Cloud Build CI/CD (git push → auto build + deploy)  ← you are here
-- [ ] **L5.3** Terraform to codify all infrastructure
+- [x] **L5.2** Cloud Build CI/CD: `cloudbuild.yaml` + GitHub trigger on push to `main`, dedicated least-privilege `docintel-cicd-sa` — merge → auto build + deploy
+- [x] **L5.3** Terraform (`infra/`): created a dead-letter topic + imported the existing topic; full write→init→plan→apply→import loop
+
+**🏆 Roadmap L0→L5 complete.** Possible next: automated tests in CI, a dead-letter subscription policy, expand Terraform to cover all infra, or the SEC EDGAR ingestion feature.
 
 ## Key identifiers
 
