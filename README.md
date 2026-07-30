@@ -51,7 +51,11 @@ Foundation: Cloud Build CI/CD · Terraform IaC · Cloud Monitoring
 - [x] **L3.6** Deployed the function (gen2, Pub/Sub-triggered) — **ACTIVE**
 - [x] **L3.7** Made `/upload` async (store + `status: processing`, returns instantly)
 - [x] **L3.8** Verified async flow end-to-end (upload → queue → function → Firestore `done`)
-- [ ] **L4** begins: web UI + Cloud Scheduler + monitoring  ← you are here
+- [x] **L4.1** Web UI served by the API (upload + live status + results browser)
+- [x] **L4.2** Least-privilege service accounts for API & function (retired `roles/editor`)
+- [x] **L4.3** Cloud Scheduler daily stats job (OIDC-authenticated) + `/tasks/stats`, `/stats`
+- [x] **L4.4** Cloud Monitoring: uptime check on `/healthz` + email alert policy
+- [ ] **L5** begins: Go rewrite + Cloud Build CI/CD + Terraform  ← you are here
 
 ## Key identifiers
 

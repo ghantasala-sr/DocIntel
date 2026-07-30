@@ -71,8 +71,28 @@ Key rule: parse exact numbers from XBRL deterministically; use the LLM for narra
 - **Debt (L4/L5)**: trigger has `RETRY_POLICY_DO_NOT_RETRY` — production wants retries
   + a dead-letter topic; still on the broad compute SA (want least privilege).
 
-## Level 4 — Web UI + ops (next)
+## Level 4 — Web UI + ops (done)
 
-Planned: a simple web front-end (upload + browse results), **Cloud Scheduler** for
-periodic ingest (the EDGAR "pull on a schedule" step), and **Cloud Monitoring**
-dashboards/alerts. Likely tighten IAM to a dedicated least-privilege service account.
+- **Web UI**: `services/api/static/index.html` served by the API at `/` (health moved to
+  `/healthz`). Same-origin (no CORS); upload + auto-refreshing results table showing the
+  `processing → done` flip live. Alternative not taken: static hosting on GCS/Firebase
+  (would need CORS on the API).
+- **Least-privilege SAs** (retired shared `roles/editor`):
+  - `docintel-api-sa` → `storage.objectCreator` (bucket), `datastore.user`, `aiplatform.user`
+  - `docintel-processor-sa` → `datastore.user`, `aiplatform.user`, `eventarc.eventReceiver`,
+    plus `run.invoker` on its own service (needed for the Eventarc trigger to invoke it).
+    Notably needs **no** storage role — Vertex's agent reads the file.
+- **Cloud Scheduler**: job `docintel-stats-daily` (cron `0 9 * * *`, ET) calls
+  `POST /tasks/stats` via **OIDC** as `docintel-scheduler-sa` (granted `run.invoker` on the
+  API). Gotcha: the Cloud Scheduler **service agent** needed
+  `roles/iam.serviceAccountTokenCreator` on the scheduler SA to mint the OIDC token.
+- **Cloud Monitoring**: uptime check on `/healthz` (5-min, multi-region) + email
+  notification channel + alert policy "DocIntel API down".
+- **Identity count so far** (a running theme): user/ADC, API SA, processor SA, scheduler SA,
+  Cloud Storage service agent, Vertex AI service agent, Cloud Scheduler service agent.
+
+## Level 5 — Production polish (next)
+
+Planned: rewrite the hot-path (processor or a new service) in **Go** on Cloud Run;
+**Cloud Build** CI/CD (build/test/deploy on push); **Terraform** to codify all the infra
+we created by hand (project, bucket, topic, SAs + IAM, scheduler, monitoring).
