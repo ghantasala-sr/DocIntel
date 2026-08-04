@@ -1,0 +1,6 @@
+# Deterministic upload for `gcloud run deploy --source`.
+.git/
+.venv/
+__pycache__/
+*.pyc
+financials.csv

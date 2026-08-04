@@ -124,6 +124,28 @@ Key rule: parse exact numbers from XBRL deterministically; use the LLM for narra
 ## Identities in the system (a running theme)
 
 user/ADC · `docintel-api-sa` · `docintel-processor-sa` · `docintel-scheduler-sa` ·
-`docintel-cicd-sa` · Cloud Storage service agent · Vertex AI service agent ·
-Cloud Scheduler service agent · Pub/Sub service agent. Each has only the permissions
-it needs — the least-privilege story end to end.
+`docintel-cicd-sa` · `docintel-agent-sa` · Cloud Storage service agent · Vertex AI
+service agent · Cloud Scheduler service agent · Pub/Sub service agent. Each has only
+the permissions it needs — the least-privilege story end to end.
+
+## Extension — RAG + a tool-using agent (`services/rag`, `services/agent`)
+
+Beyond the L0–L5 roadmap, a hybrid retrieval/agent layer:
+
+- **RAG (`services/rag`)**: documents are chunked, embedded with Vertex AI
+  `text-embedding-005`, and stored as native **Firestore vector fields**; retrieval is
+  cosine `FindNearest` (a flat/exact vector index). Built up from a linear chain to an
+  **agentic LangGraph** (`agentic_graph.py`) that self-corrects: a retrieval-confidence
+  distance gate + an LLM relevance grade route to a **rewrite loop**, and a
+  **groundedness check** gates the answer — otherwise it **abstains** instead of
+  hallucinating. (Chose Firestore vectors over Vertex Vector Search to avoid a costly
+  always-on index endpoint.)
+- **Agent (`services/agent`)**: a LangGraph `create_react_agent` with two `@tool`s —
+  `query_financials` (guarded **text-to-SQL over BigQuery** `docintel.financials`) and
+  `search_documents` (the vector RAG). The **model chooses the tool per question**
+  (numeric → SQL, qualitative → RAG); a system prompt enforces citation + abstention.
+  Deployed to Cloud Run (`docintel-agent`) as its own least-privilege `docintel-agent-sa`
+  (datastore.user, aiplatform.user, bigquery.jobUser, bigquery.dataViewer).
+- **Design rule** (see the SEC EDGAR scaling note above): exact facts (financials) live
+  in **structured storage queried by SQL**, never embeddings; narrative lives in the
+  **vector store**. The agent bridges both.
