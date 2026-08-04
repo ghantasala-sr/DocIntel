@@ -3,104 +3,187 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>DocIntel</title>
+<title>DocIntel — Serverless AI on GCP</title>
 <style>
-  :root { --bg:#0f1216; --card:#171b21; --muted:#8b96a5; --text:#e6eaf0; --accent:#4f9cf9; --ok:#3fb950; --warn:#d29922; --line:#252b33; }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
-  header { padding:20px 24px; border-bottom:1px solid var(--line); }
-  header h1 { margin:0; font-size:20px; }
-  header p { margin:4px 0 0; color:var(--muted); font-size:13px; }
-  main { max-width:960px; margin:0 auto; padding:24px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:20px; }
-  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  input[type=file] { color:var(--muted); font-size:14px; }
-  button { background:var(--accent); color:#fff; border:0; border-radius:7px; padding:9px 16px; font-size:14px; cursor:pointer; }
-  button:disabled { opacity:.5; cursor:default; }
-  button.secondary { background:transparent; border:1px solid var(--line); color:var(--text); }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  th, td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
-  th { color:var(--muted); font-weight:600; }
-  .badge { font-size:11px; padding:2px 8px; border-radius:20px; }
-  .badge.done { background:rgba(63,185,80,.15); color:var(--ok); }
-  .badge.processing { background:rgba(210,153,34,.15); color:var(--warn); }
-  .entities span { display:inline-block; background:#20262e; color:var(--muted); border-radius:5px; padding:1px 6px; margin:2px 3px 0 0; font-size:11px; }
-  .muted { color:var(--muted); }
-  code { color:var(--accent); font-size:12px; }
+  :root{
+    --bg:#0b0e13; --panel:#12161d; --panel2:#171c24; --line:#232a35; --line2:#2d3542;
+    --text:#e7ecf3; --muted:#8b96a5; --accent:#4f9cf9; --accent-bg:#4f9cf922;
+    --teal:#2dd4bf; --teal-bg:#2dd4bf1a; --ok:#3fb950; --warn:#d29922; --user:#1f6feb26;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+  a{color:var(--accent);text-decoration:none}
+  header{display:flex;align-items:center;gap:16px;padding:14px 22px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .brand{display:flex;flex-direction:column}
+  .brand b{font-size:17px;letter-spacing:.2px}
+  .brand span{font-size:12px;color:var(--muted)}
+  nav{display:flex;gap:6px;margin-left:12px}
+  nav button{background:transparent;border:1px solid transparent;color:var(--muted);padding:8px 14px;border-radius:9px;font-size:13.5px;cursor:pointer}
+  nav button:hover{color:var(--text)}
+  nav button.active{background:var(--panel2);border-color:var(--line);color:var(--text)}
+  .spacer{flex:1}
+  .ghlink{font-size:13px;color:var(--muted);border:1px solid var(--line);padding:7px 12px;border-radius:9px}
+  main{flex:1;overflow:hidden;display:flex}
+  .tab{display:none;flex:1;overflow-y:auto;padding:22px;max-width:1000px;margin:0 auto;width:100%}
+  .tab.active{display:block}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  h2{font-size:15px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:12.5px;margin:0 0 14px}
+  input[type=file]{color:var(--muted);font-size:13px}
+  button.primary{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:9px 16px;font-size:13.5px;cursor:pointer}
+  button.primary:disabled{opacity:.5;cursor:default}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600}
+  .badge{font-size:11px;padding:2px 9px;border-radius:20px}
+  .badge.done{background:rgba(63,185,80,.15);color:var(--ok)}
+  .badge.processing{background:rgba(210,153,34,.15);color:var(--warn)}
+  .chips span{display:inline-block;background:#20262f;color:var(--muted);border-radius:5px;padding:1px 6px;margin:2px 3px 0 0;font-size:11px}
+  code{color:var(--accent);font-size:12px}
+  /* chat */
+  .chatwrap{display:flex;flex-direction:column;height:calc(100vh - 210px);min-height:360px}
+  .log{flex:1;overflow-y:auto;padding:4px}
+  .msg{margin-bottom:14px;display:flex}
+  .msg .b{padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;max-width:82%}
+  .msg.user{justify-content:flex-end}
+  .msg.user .b{background:var(--user);border:1px solid var(--accent)}
+  .msg.bot .b{background:var(--panel2);border:1px solid var(--line)}
+  .msg.bot .b.thinking{color:var(--muted);font-style:italic}
+  .examples{display:flex;gap:7px;flex-wrap:wrap;margin:6px 0 10px}
+  .examples button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);font-size:12px;padding:6px 11px;border-radius:20px;cursor:pointer}
+  .examples button:hover{color:var(--text);border-color:var(--line2)}
+  .composer{display:flex;gap:8px;margin-top:10px}
+  .composer input{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px 14px;font-size:13.5px}
+  .composer input:focus{outline:none;border-color:var(--accent)}
+  .pill{font-size:11px;color:var(--teal);background:var(--teal-bg);border:1px solid var(--teal);border-radius:20px;padding:2px 9px;margin-left:8px}
+  footer{border-top:1px solid var(--line);padding:10px 22px;color:var(--muted);font-size:11.5px;background:var(--panel)}
 </style>
 </head>
 <body>
 <header>
-  <h1>DocIntel</h1>
-  <p>Upload a document — it's stored, analyzed by Gemini asynchronously, and results appear below.</p>
+  <div class="brand"><b>DocIntel</b><span>Serverless AI document intelligence on Google Cloud</span></div>
+  <nav>
+    <button class="active" data-tab="docs" onclick="tab('docs')">Documents</button>
+    <button data-tab="fin" onclick="tab('fin')">Financial agent</button>
+    <button data-tab="cfpb" onclick="tab('cfpb')">Consumer complaints</button>
+  </nav>
+  <div class="spacer"></div>
+  <a class="ghlink" href="https://github.com/ghantasala-sr/DocIntel" target="_blank">GitHub ↗</a>
 </header>
-<main>
-  <div class="card">
-    <div class="row">
-      <input type="file" id="file" />
-      <button id="uploadBtn" onclick="upload()">Upload &amp; analyze</button>
-      <span id="status" class="muted"></span>
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="row" style="justify-content:space-between; margin-bottom:12px;">
-      <strong>Documents</strong>
-      <button class="secondary" onclick="refresh()">Refresh</button>
+<main>
+  <!-- DOCUMENTS -->
+  <section id="docs" class="tab active">
+    <div class="card">
+      <h2>Upload a document</h2>
+      <p class="sub">Stored in Cloud Storage → analyzed asynchronously by Gemini (Pub/Sub → Cloud Function) → results in Firestore.</p>
+      <div class="row">
+        <input type="file" id="file" />
+        <button class="primary" id="up" onclick="upload()">Upload &amp; analyze</button>
+        <span id="upstatus" class="sub" style="margin:0"></span>
+      </div>
     </div>
-    <table>
-      <thead>
-        <tr><th>File</th><th>Status</th><th>Type</th><th>Summary</th><th>Entities</th></tr>
-      </thead>
-      <tbody id="docs"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
-    </table>
-  </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <h2 style="margin:0">Analyzed documents</h2>
+        <button class="primary" style="background:transparent;border:1px solid var(--line);color:var(--text)" onclick="loadDocs()">Refresh</button>
+      </div>
+      <table><thead><tr><th>File</th><th>Status</th><th>Type</th><th>Summary</th><th>Entities</th></tr></thead>
+      <tbody id="docs-body"><tr><td colspan="5" class="sub" style="margin:0">Loading…</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <!-- FINANCIAL AGENT -->
+  <section id="fin" class="tab">
+    <div class="card" style="margin-bottom:10px"><h2>Financial agent <span class="pill">text-to-SQL + RAG</span></h2>
+      <p class="sub" style="margin:0">A LangGraph tool-using agent. It picks BigQuery (exact numbers) or vector search (documents) per question.</p></div>
+    <div class="examples" id="fin-ex"></div>
+    <div class="chatwrap">
+      <div class="log" id="fin-log"></div>
+      <form class="composer" onsubmit="return chat(event,'fin')">
+        <input id="fin-in" placeholder="Ask about company financials or the handbook…" autocomplete="off" />
+        <button class="primary" type="submit">Send</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- CFPB -->
+  <section id="cfpb" class="tab">
+    <div class="card" style="margin-bottom:10px"><h2>Consumer complaints agent <span class="pill">real public data</span></h2>
+      <p class="sub" style="margin:0">Over 150 real CFPB mortgage complaints. Routes SQL (counts, rankings) vs narrative search (what people say).</p></div>
+    <div class="examples" id="cfpb-ex"></div>
+    <div class="chatwrap">
+      <div class="log" id="cfpb-log"></div>
+      <form class="composer" onsubmit="return chat(event,'cfpb')">
+        <input id="cfpb-in" placeholder="Ask about CFPB mortgage complaints…" autocomplete="off" />
+        <button class="primary" type="submit">Send</button>
+      </form>
+    </div>
+  </section>
 </main>
 
+<footer>Built on GCP — Cloud Run · Vertex AI (Gemini) · Firestore vector search · BigQuery · Pub/Sub · Cloud Functions (Go) · LangGraph agents · Terraform · CI/CD</footer>
+
 <script>
-async function upload() {
-  const input = document.getElementById('file');
-  const btn = document.getElementById('uploadBtn');
-  const status = document.getElementById('status');
-  if (!input.files.length) { status.textContent = 'Pick a file first.'; return; }
-  btn.disabled = true; status.textContent = 'Uploading…';
-  const body = new FormData();
-  body.append('file', input.files[0]);
-  try {
-    const res = await fetch('/upload', { method: 'POST', body });
-    const doc = await res.json();
-    status.textContent = 'Uploaded — analyzing (id ' + doc.id.slice(0, 8) + '…)';
-    input.value = '';
-    refresh();
-  } catch (e) {
-    status.textContent = 'Upload failed: ' + e;
-  } finally {
-    btn.disabled = false;
-  }
+const AGENT_URL = "https://docintel-agent-825091457104.us-central1.run.app";
+const ENDPOINT = { fin: AGENT_URL + "/agent", cfpb: AGENT_URL + "/cfpb" };
+const EXAMPLES = {
+  fin: ["Which company had the highest revenue in 2024?", "How did Northwind Traders' revenue change from 2023 to 2024?", "How is data secured?"],
+  cfpb: ["Which company has the most mortgage complaints?", "What do people complain about with escrow?", "Which company gets the most complaints, and what are people saying?"],
+};
+
+function tab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.id===id));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  if(id==='docs') loadDocs();
+}
+function esc(s){return (s??'').toString().replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+// ---- documents ----
+async function upload(){
+  const f=document.getElementById('file'), btn=document.getElementById('up'), st=document.getElementById('upstatus');
+  if(!f.files.length){st.textContent='Pick a file first.';return}
+  btn.disabled=true; st.textContent='Uploading…';
+  const body=new FormData(); body.append('file',f.files[0]);
+  try{ const d=await (await fetch('/upload',{method:'POST',body})).json();
+    st.textContent='Uploaded — analyzing ('+d.id.slice(0,8)+'…)'; f.value=''; loadDocs();
+  }catch(e){st.textContent='Failed: '+e} finally{btn.disabled=false}
+}
+async function loadDocs(){
+  const b=document.getElementById('docs-body');
+  try{ const docs=await (await fetch('/documents')).json();
+    if(!docs.length){b.innerHTML='<tr><td colspan=5 class=sub style="margin:0">No documents yet.</td></tr>';return}
+    b.innerHTML=docs.map(d=>`<tr><td>${esc(d.filename)}<br><code>${esc((d.id||'').slice(0,8))}</code></td>
+      <td><span class="badge ${d.status==='done'?'done':'processing'}">${esc(d.status||'')}</span></td>
+      <td>${esc(d.doc_type||'—')}</td><td>${esc(d.summary||'—')}</td>
+      <td class="chips">${(d.entities||[]).map(e=>`<span>${esc(e)}</span>`).join('')}</td></tr>`).join('');
+  }catch(e){b.innerHTML='<tr><td colspan=5 class=sub>Failed: '+esc(e)+'</td></tr>'}
 }
 
-function esc(s) { return (s ?? '').toString().replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
-
-async function refresh() {
-  const tbody = document.getElementById('docs');
-  try {
-    const docs = await (await fetch('/documents')).json();
-    if (!docs.length) { tbody.innerHTML = '<tr><td colspan="5" class="muted">No documents yet.</td></tr>'; return; }
-    tbody.innerHTML = docs.map(d => `
-      <tr>
-        <td>${esc(d.filename)}<br><code>${esc((d.id||'').slice(0,8))}</code></td>
-        <td><span class="badge ${d.status==='done'?'done':'processing'}">${esc(d.status||'')}</span></td>
-        <td>${esc(d.doc_type||'—')}</td>
-        <td>${esc(d.summary||'—')}</td>
-        <td class="entities">${(d.entities||[]).map(e => `<span>${esc(e)}</span>`).join('')}</td>
-      </tr>`).join('');
-  } catch (e) {
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load: ' + esc(e) + '</td></tr>';
-  }
+// ---- chat (fin + cfpb) ----
+function renderExamples(which){
+  const box=document.getElementById(which+'-ex');
+  box.innerHTML='';
+  EXAMPLES[which].forEach(q=>{const bt=document.createElement('button');bt.textContent=q;bt.onclick=()=>{document.getElementById(which+'-in').value=q;chatSend(which)};box.appendChild(bt)});
 }
-
-refresh();
-setInterval(refresh, 4000);
+function add(which,role,text,cls){
+  const log=document.getElementById(which+'-log');
+  const m=document.createElement('div'); m.className='msg '+role;
+  const b=document.createElement('div'); b.className='b '+(cls||''); b.textContent=text;
+  m.appendChild(b); log.appendChild(m); log.scrollTop=log.scrollHeight; return b;
+}
+function chat(e,which){e.preventDefault();chatSend(which);return false}
+async function chatSend(which){
+  const inp=document.getElementById(which+'-in'); const q=inp.value.trim(); if(!q)return;
+  add(which,'user',q); inp.value='';
+  const th=add(which,'bot','thinking…','thinking');
+  try{ const d=await (await fetch(ENDPOINT[which],{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})})).json();
+    th.classList.remove('thinking'); th.textContent=d.answer||JSON.stringify(d);
+  }catch(e){th.classList.remove('thinking');th.textContent='Error: '+e}
+}
+renderExamples('fin'); renderExamples('cfpb'); loadDocs();
 </script>
 </body>
 </html>

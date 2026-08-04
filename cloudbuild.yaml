@@ -63,7 +63,7 @@ steps:
       - --region=us-central1
       - --service-account=docintel-agent-sa@docintel-srg-2026.iam.gserviceaccount.com
       - --set-env-vars=PROJECT_ID=docintel-srg-2026,REGION=us-central1
-      - --memory=1Gi
+      - --memory=2Gi
       - --timeout=300s
 
 # Record the built images in the build's metadata.
