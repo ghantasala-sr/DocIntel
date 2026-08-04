@@ -1,0 +1,13 @@
+company,ticker,fiscal_year,metric,value,unit
+Northwind Traders,NWT,2023,revenue,1200000000,USD
+Northwind Traders,NWT,2023,net_income,180000000,USD
+Northwind Traders,NWT,2024,revenue,1450000000,USD
+Northwind Traders,NWT,2024,net_income,240000000,USD
+Contoso Ltd,CTSO,2023,revenue,860000000,USD
+Contoso Ltd,CTSO,2023,net_income,95000000,USD
+Contoso Ltd,CTSO,2024,revenue,910000000,USD
+Contoso Ltd,CTSO,2024,net_income,88000000,USD
+Globex Corp,GLBX,2023,revenue,2100000000,USD
+Globex Corp,GLBX,2023,net_income,320000000,USD
+Globex Corp,GLBX,2024,revenue,1980000000,USD
+Globex Corp,GLBX,2024,net_income,410000000,USD
