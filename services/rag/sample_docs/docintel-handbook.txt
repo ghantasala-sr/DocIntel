@@ -1,0 +1,36 @@
+DocIntel Product Handbook
+
+Overview.
+DocIntel is a serverless document intelligence platform. Users upload documents
+through a web interface, and the system automatically analyzes each file with a
+large language model, extracting a summary, key entities, and a document type.
+Results are stored and can be queried through an API.
+
+Architecture.
+The platform is event-driven. An upload is stored in object storage, which emits
+an event onto a message queue. A background function consumes the event, runs the
+AI analysis, and writes the results to a NoSQL database. This decoupling lets the
+upload request return instantly while heavy processing happens out of band.
+
+Security.
+Every component runs under its own dedicated service account with least-privilege
+permissions. The document store is private by default; only explicitly granted
+identities can read objects. Uploaded files are never made public, and access is
+controlled entirely through identity and access management roles.
+
+Data retention.
+Analyzed documents and their extracted metadata are retained indefinitely by
+default. Customers on the enterprise plan can configure automatic deletion after a
+chosen number of days. Deleted documents are removed from both the object store and
+the database within twenty-four hours.
+
+Pricing.
+The free tier includes one hundred document analyses per month. The pro plan raises
+this to ten thousand analyses and adds scheduled batch ingestion. The enterprise
+plan adds configurable retention, priority support, and a dedicated environment.
+
+Support.
+Free-tier users get community support through the public forum. Pro and enterprise
+customers get email support with a one business day response target. Enterprise
+customers also receive a dedicated support contact and a ninety-nine point nine
+percent uptime commitment.

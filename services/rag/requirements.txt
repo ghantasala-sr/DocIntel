@@ -1,0 +1,5 @@
+google-genai==1.9.0
+google-cloud-firestore==2.20.0
+langgraph==0.2.74
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
