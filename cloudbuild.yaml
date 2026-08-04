@@ -35,9 +35,41 @@ steps:
       - --service-account=docintel-api-sa@docintel-srg-2026.iam.gserviceaccount.com
       - --set-env-vars=PROJECT_ID=docintel-srg-2026,REGION=us-central1,BUCKET=docintel-srg-2026-uploads
 
-# Record the built image in the build's metadata.
+  # 4) Build the agent image from services/agent/Dockerfile.
+  - id: build-agent
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/docintel-agent:$SHORT_SHA
+      - services/agent
+
+  # 5) Push the agent image.
+  - id: push-agent
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/docintel-agent:$SHORT_SHA
+
+  # 6) Deploy the agent to Cloud Run (as its own SA; more memory + timeout).
+  - id: deploy-agent
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - docintel-agent
+      - --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/docintel-agent:$SHORT_SHA
+      - --region=us-central1
+      - --service-account=docintel-agent-sa@docintel-srg-2026.iam.gserviceaccount.com
+      - --set-env-vars=PROJECT_ID=docintel-srg-2026,REGION=us-central1
+      - --memory=1Gi
+      - --timeout=300s
+
+# Record the built images in the build's metadata.
 images:
   - us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/docintel-api:$SHORT_SHA
+  - us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/docintel-agent:$SHORT_SHA
 
 options:
   logging: CLOUD_LOGGING_ONLY
