@@ -142,35 +142,29 @@ def make_worker(name: str):
     agent = SPECIALISTS[name]
 
     def node(state: State) -> dict:
+        # The specialist is a ReAct agent — it uses its tools and returns a grounded summary.
         result = agent.invoke({"messages": [("system", SPECIALIST_PROMPTS[name])] + state["messages"]})
-        msgs = result["messages"]
-        # Surface the RAW tool outputs (SQL rows, retrieved text) — the ground truth —
-        # plus the specialist's summary, so the synthesizer can't hallucinate over them.
-        tool_data = [m.content for m in msgs if getattr(m, "type", "") == "tool"]
-        block = f"[{name}]"
-        if tool_data:
-            block += "\nTool results (ground truth):\n" + "\n".join(tool_data)
-        block += f"\nSummary: {msgs[-1].content}"
-        print(f"[{name}] responded ({len(tool_data)} tool result(s))")
-        return {"messages": [AIMessage(content=block, name=name)], "visited": [name]}
+        summary = result["messages"][-1].content
+        print(f"[{name}] responded")
+        return {"messages": [AIMessage(content=summary, name=name)], "visited": [name]}
 
     return node
 
 
 def synthesize_node(state: State) -> dict:  # agent 6
-    sys = (
-        "You are the final responder. Answer the user's latest question using ONLY facts, "
-        "numbers, and names that appear explicitly in the specialist messages in this "
-        "conversation. You must NOT use any outside or prior knowledge about companies, "
-        "figures, or events. Do NOT invent, round, or estimate numbers. If a fact or figure "
-        "is not present in the specialists' messages, do not state it. If the specialists did "
-        "not find the answer, say the information is not available in the data. Quote the "
-        "specialists' figures exactly as given. Give a SINGLE, coherent answer — ignore any "
-        "specialist remarks about its own capabilities, tools, or refusals; if the data is "
-        "present in the tool results, answer from it. Write ONLY the answer prose for the user — "
-        "no agent names, labels, headers, or bracketed tags like [financials_analyst]."
-    )
-    answer = llm.invoke([("system", sys)] + state["messages"]).content
+    specialist_msgs = [m for m in state["messages"] if getattr(m, "name", None) in MEMBERS]
+    if len(specialist_msgs) == 1:
+        # One specialist already produced a grounded answer — pass it through (reliable).
+        answer = specialist_msgs[-1].content
+    elif specialist_msgs:
+        sys = (
+            "Combine the specialists' findings into ONE clear answer to the user's latest "
+            "question. Use ONLY what the specialists reported — no outside knowledge, no "
+            "invented numbers, no agent names or labels."
+        )
+        answer = llm.invoke([("system", sys)] + state["messages"]).content
+    else:
+        answer = "I don't have enough information to answer that."
     return {"messages": [AIMessage(content=answer, name="synthesizer")]}
 
 
