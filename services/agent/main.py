@@ -1,32 +1,45 @@
-"""FastAPI wrapper exposing the tool-using agent as an HTTP endpoint + chat UI."""
-from pathlib import Path
+"""FastAPI backend: threaded multi-agent chat (+ CORS for the dashboard).
+
+The supervisor multi-agent routes each turn to specialists (financials, complaints,
+documents, general) and synthesizes a grounded answer; threads.py persists memory.
+"""
+from typing import Optional
 
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from agent import run_agent
+from threads import chat, get_thread, list_threads
 
-STATIC_DIR = Path(__file__).parent / "static"
-app = FastAPI(title="DocIntel Agent", version="0.2.0")
-
-
-class AskRequest(BaseModel):
-    question: str
+app = FastAPI(title="DocIntel Multi-Agent", version="0.4.0")
+app.add_middleware(
+    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
+)
 
 
-@app.get("/", response_class=HTMLResponse)
-def index():
-    """Serve the chat UI."""
-    return (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+class ChatRequest(BaseModel):
+    message: str
+    thread_id: Optional[str] = None
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "docintel-agent"}
+    return {"status": "ok", "service": "docintel-multiagent"}
 
 
-@app.post("/agent")
-def ask_agent(req: AskRequest):
-    """Route the question to the agent, which picks SQL vs vector RAG itself."""
-    return {"question": req.question, "answer": run_agent(req.question)}
+@app.post("/chat")
+def chat_endpoint(req: ChatRequest):
+    """Send a message; the multi-agent answers with memory of the thread."""
+    return chat(req.thread_id, req.message)
+
+
+@app.get("/threads")
+def threads_endpoint():
+    """List recent conversation threads (for the sidebar)."""
+    return list_threads()
+
+
+@app.get("/threads/{thread_id}")
+def thread_endpoint(thread_id: str):
+    """Fetch one thread's message history."""
+    return get_thread(thread_id)

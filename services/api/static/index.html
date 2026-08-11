@@ -3,104 +3,177 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>DocIntel</title>
+<title>DocIntel — Multi-agent AI on GCP</title>
 <style>
-  :root { --bg:#0f1216; --card:#171b21; --muted:#8b96a5; --text:#e6eaf0; --accent:#4f9cf9; --ok:#3fb950; --warn:#d29922; --line:#252b33; }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
-  header { padding:20px 24px; border-bottom:1px solid var(--line); }
-  header h1 { margin:0; font-size:20px; }
-  header p { margin:4px 0 0; color:var(--muted); font-size:13px; }
-  main { max-width:960px; margin:0 auto; padding:24px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:20px; }
-  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  input[type=file] { color:var(--muted); font-size:14px; }
-  button { background:var(--accent); color:#fff; border:0; border-radius:7px; padding:9px 16px; font-size:14px; cursor:pointer; }
-  button:disabled { opacity:.5; cursor:default; }
-  button.secondary { background:transparent; border:1px solid var(--line); color:var(--text); }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  th, td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
-  th { color:var(--muted); font-weight:600; }
-  .badge { font-size:11px; padding:2px 8px; border-radius:20px; }
-  .badge.done { background:rgba(63,185,80,.15); color:var(--ok); }
-  .badge.processing { background:rgba(210,153,34,.15); color:var(--warn); }
-  .entities span { display:inline-block; background:#20262e; color:var(--muted); border-radius:5px; padding:1px 6px; margin:2px 3px 0 0; font-size:11px; }
-  .muted { color:var(--muted); }
-  code { color:var(--accent); font-size:12px; }
+  :root{--bg:#0b0e13;--panel:#12161d;--panel2:#171c24;--line:#232a35;--line2:#2d3542;--text:#e7ecf3;--muted:#8b96a5;--accent:#4f9cf9;--user:#1f6feb26;--teal:#2dd4bf;--amber:#d29922;--green:#3fb950;--purple:#a371f7}
+  *{box-sizing:border-box} html,body{height:100%;margin:0}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+  a{color:var(--accent);text-decoration:none}
+  header{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .brand b{font-size:16px} .brand span{display:block;font-size:11.5px;color:var(--muted)}
+  nav{display:flex;gap:6px;margin-left:10px}
+  nav button{background:transparent;border:1px solid transparent;color:var(--muted);padding:7px 13px;border-radius:9px;font-size:13px;cursor:pointer}
+  nav button.active{background:var(--panel2);border-color:var(--line);color:var(--text)}
+  .spacer{flex:1} .ghlink{font-size:12.5px;color:var(--muted);border:1px solid var(--line);padding:6px 11px;border-radius:9px}
+  main{flex:1;overflow:hidden;display:flex}
+  .view{display:none;flex:1;overflow:hidden} .view.active{display:flex}
+  #assistant.active{display:flex}
+  .side{width:220px;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;padding:12px}
+  .side button.new{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:9px;font-size:13px;cursor:pointer;margin-bottom:10px}
+  .side .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:2px 0 6px}
+  .threads{overflow-y:auto;flex:1} .threads .t{padding:8px 10px;border-radius:8px;font-size:12.5px;color:var(--muted);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .threads .t:hover,.threads .t.active{background:var(--panel2);color:var(--text)}
+  .chat{flex:1;display:flex;flex-direction:column;min-width:0}
+  .log{flex:1;overflow-y:auto;padding:20px;max-width:860px;width:100%;margin:0 auto}
+  .msg{margin-bottom:16px;display:flex;flex-direction:column} .msg.user{align-items:flex-end}
+  .msg .b{padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;max-width:86%}
+  .msg.user .b{background:var(--user);border:1px solid var(--accent)}
+  .msg.bot .b{background:var(--panel2);border:1px solid var(--line)} .msg.bot .b.think{color:var(--muted);font-style:italic}
+  .via{font-size:10.5px;color:var(--muted);margin-top:5px} .via b{color:var(--teal);font-weight:500}
+  .intro{max-width:720px;margin:6vh auto 0;text-align:center}
+  .intro h3{font-size:16px;margin:0 0 6px} .intro p{color:var(--muted);font-size:13px;margin:0 0 16px}
+  .sources{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left}
+  .src{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 13px;cursor:pointer}
+  .src:hover{border-color:var(--line2)} .src .h{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;margin-bottom:3px}
+  .dot{width:8px;height:8px;border-radius:50%} .src small{color:var(--muted);font-size:11.5px;line-height:1.4;display:block}
+  .src .ex{color:var(--accent);font-size:11.5px;margin-top:6px}
+  .composer{display:flex;gap:8px;padding:14px 20px;border-top:1px solid var(--line);max-width:860px;width:100%;margin:0 auto}
+  .composer input{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px 14px;font-size:13.5px}
+  .composer input:focus{outline:none;border-color:var(--accent)} .composer button{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:0 18px;font-size:13.5px;cursor:pointer}
+  .scroll{flex:1;overflow-y:auto;padding:24px;max-width:960px;margin:0 auto;width:100%}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+  h2{font-size:15px;margin:0 0 4px} h3{font-size:14px;margin:18px 0 8px} .sub{color:var(--muted);font-size:12.5px;margin:0 0 14px}
+  input[type=file]{color:var(--muted);font-size:13px} button.primary{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:9px 16px;font-size:13.5px;cursor:pointer}
+  table{width:100%;border-collapse:collapse;font-size:12.5px} th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top} th{color:var(--muted)}
+  .badge{font-size:11px;padding:2px 9px;border-radius:20px} .badge.done{background:rgba(63,185,80,.15);color:var(--green)} .badge.processing{background:rgba(210,153,34,.15);color:var(--amber)}
+  .chips span{display:inline-block;background:#20262f;color:var(--muted);border-radius:5px;padding:1px 6px;margin:2px 3px 0 0;font-size:11px}
+  code{color:var(--accent);font-size:12px}
+  .stack span{display:inline-block;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:20px;padding:3px 10px;margin:3px 4px 0 0;font-size:11.5px}
+  .flow{display:flex;flex-direction:column;gap:10px}
+  .tier{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+  .box{flex:1;min-width:120px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .box .bt{font-size:13px;font-weight:500} .box .bs{font-size:11px;color:var(--muted);margin-top:2px}
+  .arrow{text-align:center;color:var(--muted);font-size:14px}
+  footer{border-top:1px solid var(--line);padding:8px 20px;color:var(--muted);font-size:11px;background:var(--panel)}
 </style>
 </head>
 <body>
 <header>
-  <h1>DocIntel</h1>
-  <p>Upload a document — it's stored, analyzed by Gemini asynchronously, and results appear below.</p>
+  <div class="brand"><b>DocIntel</b><span>Multi-agent document &amp; data intelligence on GCP</span></div>
+  <nav>
+    <button class="active" data-v="assistant" onclick="view('assistant')">Assistant</button>
+    <button data-v="docs" onclick="view('docs')">Documents</button>
+    <button data-v="arch" onclick="view('arch')">Architecture</button>
+  </nav>
+  <div class="spacer"></div>
+  <a class="ghlink" href="https://github.com/ghantasala-sr/DocIntel" target="_blank">GitHub ↗</a>
 </header>
+
 <main>
-  <div class="card">
-    <div class="row">
-      <input type="file" id="file" />
-      <button id="uploadBtn" onclick="upload()">Upload &amp; analyze</button>
-      <span id="status" class="muted"></span>
+  <!-- ASSISTANT -->
+  <div id="assistant" class="active">
+    <div class="side">
+      <button class="new" onclick="newChat()">+ New chat</button>
+      <div class="lbl">Conversations</div>
+      <div class="threads" id="threads"></div>
+    </div>
+    <div class="chat">
+      <div class="log" id="log"></div>
+      <form class="composer" onsubmit="return send(event)">
+        <input id="in" placeholder="Ask about financials, complaints, documents, or anything…" autocomplete="off" />
+        <button type="submit">Send</button>
+      </form>
     </div>
   </div>
 
-  <div class="card">
-    <div class="row" style="justify-content:space-between; margin-bottom:12px;">
-      <strong>Documents</strong>
-      <button class="secondary" onclick="refresh()">Refresh</button>
+  <!-- DOCUMENTS -->
+  <div id="docs" class="view">
+    <div class="scroll">
+      <div class="card"><h2>Upload a document</h2>
+        <p class="sub">Stored in Cloud Storage → analyzed asynchronously by Gemini (Pub/Sub → Go Cloud Function) → results in Firestore. Uploaded docs also become searchable by the Assistant.</p>
+        <div><input type="file" id="file" /> <button class="primary" id="up" onclick="upload()">Upload &amp; analyze</button> <span id="ust" class="sub" style="margin:0"></span></div>
+      </div>
+      <div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Analyzed documents</h2><button class="primary" style="background:transparent;border:1px solid var(--line);color:var(--text)" onclick="loadDocs()">Refresh</button></div>
+        <table><thead><tr><th>File</th><th>Status</th><th>Type</th><th>Summary</th><th>Entities</th></tr></thead><tbody id="db"><tr><td colspan=5 class=sub style="margin:0">Loading…</td></tr></tbody></table>
+      </div>
     </div>
-    <table>
-      <thead>
-        <tr><th>File</th><th>Status</th><th>Type</th><th>Summary</th><th>Entities</th></tr>
-      </thead>
-      <tbody id="docs"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
-    </table>
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <div id="arch" class="view">
+    <div class="scroll">
+      <div class="card">
+        <h2>How it works</h2>
+        <p class="sub">Your question goes to a <b style="color:var(--text)">LangGraph supervisor multi-agent</b>: a router picks the right specialist(s), each queries real data with its tools, and a synthesizer writes a grounded, cited answer. Everything runs serverless on Google Cloud.</p>
+        <div class="flow">
+          <div class="tier"><div class="box"><div class="bt">Browser</div><div class="bs">this dashboard</div></div></div>
+          <div class="arrow">↓</div>
+          <div class="tier"><div class="box"><div class="bt">API · Cloud Run</div><div class="bs">serves UI · document pipeline</div></div><div class="box"><div class="bt">Agent · Cloud Run</div><div class="bs">/chat · threads (memory)</div></div></div>
+          <div class="arrow">↓</div>
+          <div class="tier"><div class="box" style="border-color:var(--purple)"><div class="bt">Supervisor</div><div class="bs">routes the turn</div></div><div class="box"><div class="bt">financials</div><div class="bs">→ SQL</div></div><div class="box"><div class="bt">complaints</div><div class="bs">→ SQL + RAG</div></div><div class="box"><div class="bt">documents</div><div class="bs">→ RAG</div></div><div class="box"><div class="bt">general</div><div class="bs">→ Gemini</div></div><div class="box" style="border-color:var(--teal)"><div class="bt">synthesizer</div><div class="bs">grounded answer</div></div></div>
+          <div class="arrow">↓</div>
+          <div class="tier"><div class="box"><div class="bt">BigQuery</div><div class="bs">financials · complaints</div></div><div class="box"><div class="bt">Firestore</div><div class="bs">vector search · threads</div></div><div class="box"><div class="bt">Vertex AI · Gemini</div><div class="bs">embeddings · generation</div></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Data you can query</h2>
+        <div class="sources" style="grid-template-columns:1fr 1fr;margin-top:10px" id="arch-src"></div>
+      </div>
+      <div class="card">
+        <h2>Built with</h2>
+        <div class="stack" style="margin-top:8px"><span>Cloud Run</span><span>Vertex AI (Gemini)</span><span>Firestore vector search</span><span>BigQuery</span><span>Cloud Storage</span><span>Pub/Sub</span><span>Cloud Functions (Go)</span><span>Cloud Scheduler</span><span>Cloud Monitoring</span><span>LangGraph</span><span>Terraform</span><span>Cloud Build CI/CD</span></div>
+      </div>
+    </div>
   </div>
 </main>
+<footer>6-agent LangGraph supervisor · grounded &amp; cited · persistent threaded memory · running serverless on Google Cloud</footer>
 
 <script>
-async function upload() {
-  const input = document.getElementById('file');
-  const btn = document.getElementById('uploadBtn');
-  const status = document.getElementById('status');
-  if (!input.files.length) { status.textContent = 'Pick a file first.'; return; }
-  btn.disabled = true; status.textContent = 'Uploading…';
-  const body = new FormData();
-  body.append('file', input.files[0]);
-  try {
-    const res = await fetch('/upload', { method: 'POST', body });
-    const doc = await res.json();
-    status.textContent = 'Uploaded — analyzing (id ' + doc.id.slice(0, 8) + '…)';
-    input.value = '';
-    refresh();
-  } catch (e) {
-    status.textContent = 'Upload failed: ' + e;
-  } finally {
-    btn.disabled = false;
-  }
-}
+const AGENT="https://docintel-agent-825091457104.us-central1.run.app";
+const SOURCES=[
+  {c:'#4f9cf9',n:'Company financials',d:'BigQuery — revenue & net income for Northwind Traders, Contoso Ltd, and Globex Corp (2023–2024).',ex:'Which company had the highest revenue in 2024?'},
+  {c:'#d29922',n:'Consumer complaints',d:'BigQuery + vectors — 150 real CFPB mortgage complaints (public data): company, issue, and what consumers wrote.',ex:'Which company has the most mortgage complaints, and what are people saying?'},
+  {c:'#3fb950',n:'Documents',d:'Firestore vector search — uploaded documents plus a product handbook, searchable by meaning.',ex:'How is data secured?'},
+  {c:'#a371f7',n:'General knowledge',d:'Gemini — anything outside the datasets above.',ex:'What is a vector database in one sentence?'},
+];
+let thread=null;
 
-function esc(s) { return (s ?? '').toString().replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function view(v){document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v===v));
+  document.getElementById('assistant').classList.toggle('active',v==='assistant');
+  document.getElementById('docs').classList.toggle('active',v==='docs');
+  document.getElementById('arch').classList.toggle('active',v==='arch');
+  if(v==='docs')loadDocs()}
+function esc(s){return (s??'').toString().replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 
-async function refresh() {
-  const tbody = document.getElementById('docs');
-  try {
-    const docs = await (await fetch('/documents')).json();
-    if (!docs.length) { tbody.innerHTML = '<tr><td colspan="5" class="muted">No documents yet.</td></tr>'; return; }
-    tbody.innerHTML = docs.map(d => `
-      <tr>
-        <td>${esc(d.filename)}<br><code>${esc((d.id||'').slice(0,8))}</code></td>
-        <td><span class="badge ${d.status==='done'?'done':'processing'}">${esc(d.status||'')}</span></td>
-        <td>${esc(d.doc_type||'—')}</td>
-        <td>${esc(d.summary||'—')}</td>
-        <td class="entities">${(d.entities||[]).map(e => `<span>${esc(e)}</span>`).join('')}</td>
-      </tr>`).join('');
-  } catch (e) {
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">Failed to load: ' + esc(e) + '</td></tr>';
-  }
-}
+async function loadThreads(){try{const ts=await (await fetch(AGENT+'/threads')).json();
+  document.getElementById('threads').innerHTML=ts.map(t=>`<div class="t ${t.id===thread?'active':''}" onclick="openThread('${t.id}')">${esc(t.title)}</div>`).join('')||'<div class=sub style="margin:0;padding:4px">No chats yet</div>';}catch(e){}}
+function newChat(){thread=null;renderEmpty();loadThreads()}
+function srcCards(onclick){return SOURCES.map(s=>`<div class="src" ${onclick?`onclick="ask('${esc(s.ex).replace(/'/g,"\\'")}')"`:''}><div class="h"><span class="dot" style="background:${s.c}"></span>${esc(s.n)}</div><small>${esc(s.d)}</small>${onclick?`<div class="ex">“${esc(s.ex)}” ↗</div>`:''}</div>`).join('')}
+function renderEmpty(){document.getElementById('log').innerHTML=`<div class="intro"><h3>Ask the multi-agent anything</h3><p>A supervisor routes your question to the right specialist over real data, and the conversation is remembered. Try a data source:</p><div class="sources">${srcCards(true)}</div></div>`}
+async function openThread(id){thread=id;const t=await (await fetch(AGENT+'/threads/'+id)).json();const log=document.getElementById('log');log.innerHTML='';
+  (t.messages||[]).forEach(m=>add(m.role==='user'?'user':'bot',m.content,null,m.agents));loadThreads()}
+function add(role,text,cls,agents){const log=document.getElementById('log');const m=document.createElement('div');m.className='msg '+role;
+  const b=document.createElement('div');b.className='b '+(cls||'');b.textContent=text;m.appendChild(b);
+  if(role==='bot'&&agents&&agents.length){const v=document.createElement('div');v.className='via';v.innerHTML='handled by: '+agents.map(a=>`<b>${esc(a)}</b>`).join(', ');m.appendChild(v)}
+  log.appendChild(m);log.scrollTop=log.scrollHeight;return b}
+function send(e){e.preventDefault();const i=document.getElementById('in');const q=i.value.trim();if(q){i.value='';ask(q)}return false}
+async function ask(q){if(document.querySelector('.intro'))document.getElementById('log').innerHTML='';
+  add('user',q);const th=add('bot','thinking… the agents are working (~15–25s)','think');
+  try{const d=await (await fetch(AGENT+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,thread_id:thread})})).json();
+    thread=d.thread_id;th.classList.remove('think');th.textContent=d.answer||JSON.stringify(d);
+    if(d.agents&&d.agents.length){const v=document.createElement('div');v.className='via';v.innerHTML='handled by: '+d.agents.map(a=>`<b>${esc(a)}</b>`).join(', ');th.parentElement.appendChild(v)}
+    loadThreads();
+  }catch(e){th.classList.remove('think');th.textContent='Error: '+e}}
 
-refresh();
-setInterval(refresh, 4000);
+async function upload(){const f=document.getElementById('file'),b=document.getElementById('up'),s=document.getElementById('ust');
+  if(!f.files.length){s.textContent='Pick a file first.';return}b.disabled=true;s.textContent='Uploading…';
+  const body=new FormData();body.append('file',f.files[0]);
+  try{const d=await (await fetch('/upload',{method:'POST',body})).json();s.textContent='Uploaded — analyzing ('+d.id.slice(0,8)+'…)';f.value='';loadDocs()}catch(e){s.textContent='Failed: '+e}finally{b.disabled=false}}
+async function loadDocs(){const b=document.getElementById('db');try{const docs=await (await fetch('/documents')).json();
+  b.innerHTML=docs.length?docs.map(d=>`<tr><td>${esc(d.filename)}<br><code>${esc((d.id||'').slice(0,8))}</code></td><td><span class="badge ${d.status==='done'?'done':'processing'}">${esc(d.status||'')}</span></td><td>${esc(d.doc_type||'—')}</td><td>${esc(d.summary||'—')}</td><td class="chips">${(d.entities||[]).map(e=>`<span>${esc(e)}</span>`).join('')}</td></tr>`).join(''):'<tr><td colspan=5 class=sub style="margin:0">No documents yet.</td></tr>';}catch(e){b.innerHTML='<tr><td colspan=5 class=sub>Failed: '+esc(e)+'</td></tr>'}}
+
+document.getElementById('arch-src').innerHTML=srcCards(false);
+renderEmpty();loadThreads();
 </script>
 </body>
 </html>
