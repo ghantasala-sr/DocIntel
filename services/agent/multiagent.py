@@ -157,7 +157,8 @@ def synthesize_node(state: State) -> dict:  # agent 6
         "figures, or events. Do NOT invent, round, or estimate numbers. If a fact or figure "
         "is not present in the specialists' messages, do not state it. If the specialists did "
         "not find the answer, say the information is not available in the data. Quote the "
-        "specialists' figures exactly as given."
+        "specialists' figures exactly as given. Write ONLY the answer prose for the user — "
+        "do not include agent names, labels, headers, or bracketed tags like [financials_analyst]."
     )
     answer = llm.invoke([("system", sys)] + state["messages"]).content
     return {"messages": [AIMessage(content=answer, name="synthesizer")]}
@@ -176,11 +177,13 @@ builder.add_edge("synthesize", END)
 graph = builder.compile()
 
 
-def run_multiagent(messages: list) -> str:
-    """Run the supervisor graph over a message list; return the final answer text."""
+def run_multiagent(messages: list) -> dict:
+    """Run the supervisor graph; return the answer + which specialists were consulted."""
     result = graph.invoke({"messages": messages, "visited": []}, config={"recursion_limit": 12})
-    return result["messages"][-1].content
+    answer = re.sub(r"^\s*\[[^\]]+\]\s*", "", result["messages"][-1].content).strip()
+    return {"answer": answer, "agents": result.get("visited", [])}
 
 
 if __name__ == "__main__":
-    print("\nANSWER:\n" + run_multiagent([HumanMessage(content=sys.argv[1])]))
+    out = run_multiagent([HumanMessage(content=sys.argv[1])])
+    print(f"\n(handled by: {', '.join(out['agents']) or 'supervisor'})\nANSWER:\n{out['answer']}")

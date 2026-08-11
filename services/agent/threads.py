@@ -57,9 +57,13 @@ def chat(thread_id: str | None, message: str) -> dict:
         for m in history
     ]
     lc_messages.append(HumanMessage(message))
-    answer = run_multiagent(lc_messages)
+    result = run_multiagent(lc_messages)
+    answer, agents = result["answer"], result["agents"]
 
-    history += [{"role": "user", "content": message}, {"role": "assistant", "content": answer}]
+    history += [
+        {"role": "user", "content": message},
+        {"role": "assistant", "content": answer, "agents": agents},
+    ]
     data.update(messages=history, updated_at=_now())
     ref.set(data)
-    return {"thread_id": ref.id, "answer": answer}
+    return {"thread_id": ref.id, "answer": answer, "agents": agents}
