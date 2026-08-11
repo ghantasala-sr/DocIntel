@@ -1,48 +1,45 @@
-"""FastAPI wrapper exposing the agents as HTTP endpoints (+ its own chat UI).
+"""FastAPI backend: threaded multi-agent chat (+ CORS for the dashboard).
 
-CORS is open so the DocIntel dashboard (served by the API on a different origin)
-can call /agent and /cfpb.
+The supervisor multi-agent routes each turn to specialists (financials, complaints,
+documents, general) and synthesizes a grounded answer; threads.py persists memory.
 """
-from pathlib import Path
+from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
-from agent import run_agent
+from threads import chat, get_thread, list_threads
 
-STATIC_DIR = Path(__file__).parent / "static"
-app = FastAPI(title="DocIntel Agent", version="0.3.0")
+app = FastAPI(title="DocIntel Multi-Agent", version="0.4.0")
 app.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
 )
 
 
-class AskRequest(BaseModel):
-    question: str
-
-
-@app.get("/", response_class=HTMLResponse)
-def index():
-    """Serve the chat UI."""
-    return (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+class ChatRequest(BaseModel):
+    message: str
+    thread_id: Optional[str] = None
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "docintel-agent"}
+    return {"status": "ok", "service": "docintel-multiagent"}
 
 
-@app.post("/agent")
-def ask_agent(req: AskRequest):
-    """Financial agent — routes text-to-SQL (BigQuery) vs vector RAG (documents)."""
-    return {"question": req.question, "answer": run_agent(req.question)}
+@app.post("/chat")
+def chat_endpoint(req: ChatRequest):
+    """Send a message; the multi-agent answers with memory of the thread."""
+    return chat(req.thread_id, req.message)
 
 
-@app.post("/cfpb")
-def ask_cfpb(req: AskRequest):
-    """CFPB consumer-complaints agent (lazy-imported on first call to keep startup light)."""
-    from cfpb_agent import run_agent as run_cfpb
+@app.get("/threads")
+def threads_endpoint():
+    """List recent conversation threads (for the sidebar)."""
+    return list_threads()
 
-    return {"question": req.question, "answer": run_cfpb(req.question)}
+
+@app.get("/threads/{thread_id}")
+def thread_endpoint(thread_id: str):
+    """Fetch one thread's message history."""
+    return get_thread(thread_id)
