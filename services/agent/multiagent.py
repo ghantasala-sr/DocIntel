@@ -99,6 +99,14 @@ SPECIALISTS = {
     "general_assistant": general_assistant,
 }
 
+# A clear role for each specialist so it doesn't confabulate or refuse.
+SPECIALIST_PROMPTS = {
+    "financials_analyst": "You analyze company financials (revenue, net income) using your BigQuery tool. Always call the tool for numbers; answer concisely with the figures.",
+    "complaints_analyst": "You analyze CFPB mortgage consumer complaints. Use query_complaints for counts/rankings and search_complaints for what people wrote. Always use the tools; answer concisely, grounded in the results.",
+    "document_librarian": "You answer from uploaded documents and the product handbook using your search tool. Always search; answer only from the retrieved text.",
+    "general_assistant": "You answer general-knowledge questions concisely. You have no data tools; do not claim to.",
+}
+
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
@@ -134,7 +142,7 @@ def make_worker(name: str):
     agent = SPECIALISTS[name]
 
     def node(state: State) -> dict:
-        result = agent.invoke({"messages": state["messages"]})
+        result = agent.invoke({"messages": [("system", SPECIALIST_PROMPTS[name])] + state["messages"]})
         msgs = result["messages"]
         # Surface the RAW tool outputs (SQL rows, retrieved text) — the ground truth —
         # plus the specialist's summary, so the synthesizer can't hallucinate over them.
@@ -157,8 +165,10 @@ def synthesize_node(state: State) -> dict:  # agent 6
         "figures, or events. Do NOT invent, round, or estimate numbers. If a fact or figure "
         "is not present in the specialists' messages, do not state it. If the specialists did "
         "not find the answer, say the information is not available in the data. Quote the "
-        "specialists' figures exactly as given. Write ONLY the answer prose for the user — "
-        "do not include agent names, labels, headers, or bracketed tags like [financials_analyst]."
+        "specialists' figures exactly as given. Give a SINGLE, coherent answer — ignore any "
+        "specialist remarks about its own capabilities, tools, or refusals; if the data is "
+        "present in the tool results, answer from it. Write ONLY the answer prose for the user — "
+        "no agent names, labels, headers, or bracketed tags like [financials_analyst]."
     )
     answer = llm.invoke([("system", sys)] + state["messages"]).content
     return {"messages": [AIMessage(content=answer, name="synthesizer")]}
