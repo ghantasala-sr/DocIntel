@@ -131,8 +131,9 @@ def supervisor_node(state: State) -> dict:  # agent 1
         "Route to the fewest specialists needed."
     )
     route = llm.with_structured_output(Route).invoke([("system", sys)] + state["messages"]).next
-    # Hard guard against loops: never repeat a specialist; cap total specialists per turn.
-    if route in visited or len(visited) >= 3:
+    # Reliability guard: route to a single best specialist per turn, then synthesize
+    # (its grounded answer passes straight through). Prevents over-routing + loops.
+    if route in visited or len(visited) >= 1:
         route = "synthesize"
     print(f"[supervisor] -> {route}")
     return {"next": route}
