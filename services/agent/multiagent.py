@@ -121,14 +121,15 @@ class Route(BaseModel):
 def supervisor_node(state: State) -> dict:  # agent 1
     visited = state.get("visited", [])
     sys = (
-        "You are a supervisor routing the user's request to specialists:\n"
-        "- financials_analyst: company revenue/net_income facts.\n"
-        "- complaints_analyst: CFPB mortgage complaints (counts + what people say).\n"
-        "- document_librarian: uploaded documents / product handbook.\n"
-        "- general_assistant: general knowledge or conversation.\n"
-        f"Specialists already consulted this turn (do NOT pick these again): {visited}. "
-        "If their responses in the conversation now answer the question, choose 'synthesize'. "
-        "Route to the fewest specialists needed."
+        "You are a supervisor routing the user's request to ONE specialist:\n"
+        "- financials_analyst: company revenue / net income figures.\n"
+        "- complaints_analyst: CFPB mortgage complaints (counts, rankings, and what consumers wrote).\n"
+        "- document_librarian: the product, its handbook and uploaded documents — how the system "
+        "works, security, data retention, pricing, support, architecture.\n"
+        "- general_assistant: ONLY general world knowledge clearly unrelated to the datasets above.\n"
+        "Prefer a data specialist over general_assistant whenever the question could relate to its data. "
+        f"Already consulted this turn (do NOT repeat): {visited}. "
+        "If the conversation already answers the question, choose 'synthesize'."
     )
     route = llm.with_structured_output(Route).invoke([("system", sys)] + state["messages"]).next
     # Reliability guard: route to a single best specialist per turn, then synthesize
